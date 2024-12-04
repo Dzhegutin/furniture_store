@@ -17,7 +17,3 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     phone_number = Column(String)
     user_city = Column(String)
     address = Column(String)
-
-
-async def get_user_db(session: AsyncSession = Depends(get_db)):
-    yield SQLAlchemyUserDatabase(session, User)

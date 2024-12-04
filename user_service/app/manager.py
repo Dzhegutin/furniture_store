@@ -3,11 +3,20 @@ from typing import Optional, List
 from fastapi_users import IntegerIDMixin, BaseUserManager, schemas, models, exceptions
 
 from fastapi import Depends, Request
+from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
 from app.database import get_db, SessionLocal
 from app.config import SECRETMANAGER
+
+
+async def get_user_db(session: AsyncSession = Depends(get_db)):
+    yield SQLAlchemyUserDatabase(session, User)
+
+
+async def get_user_manager(user_db=Depends(get_user_db)):
+    yield UserManager(user_db)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -25,6 +34,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
             request: Optional[Request] = None,
     ) -> models.UP:
         await self.validate_password(user_create.password, user_create)
+        print(f"self.user_db: {self.user_db}")
 
         existing_user = await self.user_db.get_by_email(user_create.email)
         if existing_user is not None:
@@ -44,6 +54,3 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
         return created_user
 
-
-async def get_user_manager(user_db=Depends(get_db)):
-    yield UserManager(user_db)
