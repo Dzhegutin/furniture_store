@@ -1,0 +1,8 @@
+fastapi==0.95.2
+uvicorn[standard]==0.23.1
+sqlalchemy==2.0.20
+asyncpg==0.27.0
+passlib[bcrypt]
+fastapi-users[sqlalchemy]
+python-jose
+email-validator

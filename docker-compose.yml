@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - product_service
+      - order_service
+      - customer_service
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+      - REDIS_URL=redis://redis
+
+  product_service:
+    build: ./product_service
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/products
+      - REDIS_URL=redis://redis
+
+  order_service:
+    build: ./order_service
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/orders
+
+  customer_service:
+    build: stock_service
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/customers
+
+  analytics_service:
+    build: ./analytics_service
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq
+
+  postgres:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  redis:
+    image: redis:7
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"  # Порт для RabbitMQ Management UI
+volumes:
+  postgres_data:
