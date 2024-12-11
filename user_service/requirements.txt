@@ -6,3 +6,4 @@ passlib[bcrypt]
 fastapi-users[sqlalchemy]
 python-jose
 email-validator
+httpx==0.25.0

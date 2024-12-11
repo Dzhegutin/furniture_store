@@ -4,8 +4,8 @@ from app.routes import stocks, stock_items
 app = FastAPI(title="Stock Service")
 
 # Подключаем маршруты
-app.include_router(stocks.router, prefix="/stocks", tags=["Stocks"])
-app.include_router(stock_items.router, prefix="/stock-items", tags=["Stock Items"])
+app.include_router(stocks.router, prefix="/api/stocks", tags=["Stocks"])
+app.include_router(stock_items.router, prefix="/api/stock-items", tags=["Stock Items"])
 
 @app.get("/")
 def read_root():

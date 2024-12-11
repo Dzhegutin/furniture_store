@@ -1,62 +1,56 @@
 version: '3.8'
 
 services:
-  gateway:
-    build: ./gateway
+  user_service:
+    build:
+      context: ./user_service  # Путь к каталогу с Dockerfile для user_service
     ports:
       - "8000:8000"
-    depends_on:
-      - product_service
-      - order_service
-      - customer_service
+    networks:
+      - backend
     environment:
-      - RABBITMQ_URL=amqp://rabbitmq
-      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql+asyncpg://postgres:rongal1000@host.docker.internal:5432/user  # Подключение к внешней базе данных
 
   product_service:
-    build: ./product_service
-    depends_on:
-      - postgres
-      - redis
+    build:
+      context: ./product_service  # Путь к каталогу с Dockerfile для product_service
+    ports:
+      - "8001:8001"
+    networks:
+      - backend
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/products
-      - REDIS_URL=redis://redis
+      - DATABASE_URL=postgresql+asyncpg://postgres:rongal1000@host.docker.internal:5432/product  # Подключение к внешней базе данных
 
   order_service:
-    build: ./order_service
-    depends_on:
-      - postgres
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/orders
-
-  customer_service:
-    build: stock_service
-    depends_on:
-      - postgres
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/customers
-
-  analytics_service:
-    build: ./analytics_service
-    depends_on:
-      - rabbitmq
-    environment:
-      - RABBITMQ_URL=amqp://rabbitmq
-
-  postgres:
-    image: postgres:15
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-
-  redis:
-    image: redis:7
-
-  rabbitmq:
-    image: rabbitmq:3-management
+    build:
+      context: ./order_service  # Путь к каталогу с Dockerfile для order_service
     ports:
-      - "15672:15672"  # Порт для RabbitMQ Management UI
-volumes:
-  postgres_data:
+      - "8002:8002"
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:rongal1000@host.docker.internal:5432/order  # Подключение к внешней базе данных
+
+  cart_service:
+    build:
+      context: ./cart_service  # Путь к каталогу с Dockerfile для cart_service
+    ports:
+      - "8003:8003"
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:rongal1000@host.docker.internal:5432/cart  # Подключение к внешней базе данных
+
+  stock_service:
+    build:
+      context: ./stock_service  # Путь к каталогу с Dockerfile для stock_service
+    ports:
+      - "8004:8004"
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:rongal1000@host.docker.internal:5432/stock  # Подключение к внешней базе данных
+
+networks:
+  backend:
+    driver: bridge

@@ -16,20 +16,22 @@ fastapi_users = FastAPIUsers[User, int](
 # Роуты авторизации
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
-    prefix="/auth/jwt",
+    prefix="/api/auth/jwt",
     tags=["auth"],
 )
 
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["auth"],
 )
 
 # Пример защищенного и открытого роутов
 current_user = fastapi_users.current_user()
 
-
+@app.post("/api/auth/jwt/verify-token")
+async def verify_token(user=Depends(fastapi_users.current_user(active=True))):
+    return user  # Вернуть информацию о пользователе, если токен валиден
 @app.get("/protected-route")
 def protected_route(user: User = Depends(current_user)):
     return {"message": f"Hello, {user.name}"}
